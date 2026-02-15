@@ -4,7 +4,7 @@ Code for *A Critical Look at Targeted Instruction Selection: Disentangling What 
 
 Paper: **TODO**
 
-Datasets: [https://huggingface.co/datasets/Harvard-DCML/targeted-instruction-selection](https://huggingface.co/collections/Harvard-DCML/targeted-instruction-selection)
+Datasets: [https://huggingface.co/collections/Harvard-DCML/targeted-instruction-selection](https://huggingface.co/collections/Harvard-DCML/targeted-instruction-selection)
 
 ## Table of Contents
 
