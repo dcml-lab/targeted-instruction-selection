@@ -50,7 +50,7 @@ sh download_eval.sh
 ## Data Representation
 Here we describe how to compute data representations for RDS+, EMBED, and LESS. The computed representations are saved in `files/index` and are used for both the quantile and budget experiments.
 
-Skip this step if you prefer to use the precomputed datasets from [Hugging Face](https://huggingface.co/datasets/Harvard-DCML/targeted-instruction-selection).
+Skip this step if you prefer to use the precomputed datasets from [Hugging Face](https://huggingface.co/collections/Harvard-DCML/targeted-instruction-selection).
 
 ### RDS+
 Run the following command to compute RDS+ representations with `meta-llama/Llama-2-7b-hf` and compute the cosine similarity between the train and query representations:
