@@ -4,12 +4,11 @@ Code for A Critical Look at Targeted Instruction Selection: Disentangling What M
 
 In this work, we aim to bring clarity to the landscape of targeted instruction selection by disentangling and systematically analyzing the two core ingredients: (i) data representation, and (ii) the selection algorithm (see Figure).
 
+![image](assets/figure/targeted-subset-selection.jpeg)
 
 Paper: **TODO**
 
 Datasets: [Harvard-DCML/targeted-instruction-selection](https://huggingface.co/datasets/Harvard-DCML/targeted-instruction-selection)
-
-![image](assets/figure/targeted-subset-selection.jpeg)
 
 ## Table of Contents
 
