@@ -1,0 +1,10 @@
+torch==2.8.0
+peft
+hf_transfer
+evaluate
+sentence-transformers
+datasets
+wandb
+transformers
+vllm
+traker==0.3.2
