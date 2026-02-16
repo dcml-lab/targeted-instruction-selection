@@ -1,15 +1,10 @@
 # A Critical Look at Targeted Instruction Selection
 
-Code for A Critical Look at Targeted Instruction Selection: Disentangling What Matters (and What Doesn’t).
-
-In this work, we aim to bring clarity to the landscape of targeted instruction selection by disentangling and systematically analyzing the two core ingredients: (i) data representation, and (ii) the selection algorithm (see Figure).
-
+Code for *A Critical Look at Targeted Instruction Selection: Disentangling What Matters (and What Doesn’t)*.
 
 Paper: **TODO**
 
-Datasets: [Harvard-DCML/targeted-instruction-selection](https://huggingface.co/datasets/Harvard-DCML/targeted-instruction-selection)
-
-![image](assets/figure/targeted-subset-selection.jpeg)
+Datasets: [https://huggingface.co/collections/Harvard-DCML/targeted-instruction-selection](https://huggingface.co/collections/Harvard-DCML/targeted-instruction-selection)
 
 ## Table of Contents
 
@@ -53,12 +48,12 @@ sh download_eval.sh
 ```
 
 ## Data Representation
-Here we describe how to compute the data representations for RDS+, EMBED, and LESS. The computed representations are saved in `files/index` and are used for both the quantile and budget experiments.
+Here we describe how to compute data representations for RDS+, EMBED, and LESS. The computed representations are saved in `files/index` and are used for both the quantile and budget experiments.
 
-Skip this step, if you prefer to use pre-computed datasets from [Huggingface](https://huggingface.co/datasets/Harvard-DCML/targeted-instruction-selection).
+Skip this step if you prefer to use the precomputed datasets from [Hugging Face](https://huggingface.co/collections/Harvard-DCML/targeted-instruction-selection).
 
 ### RDS+
-Run the following command to compute RDS+ representations with `meta-llama/Llama-2-7b-hf` and compute the cosine similarity between the train and dev representations:
+Run the following command to compute RDS+ representations with `meta-llama/Llama-2-7b-hf` and compute the cosine similarity between the train and query representations:
 ```bash
 ds="bbh"
 python3 -m representation.rds.compute_rds_embeds \
@@ -74,7 +69,7 @@ python3 -m representation.rds.compute_rds_embeds \
 
 ### EMBED
 
-Run the following command to compute EMBED representations with `sentence-transformers/gtr-t5-base` and compute the cosine similarity between the train and dev representations:
+Run the following command to compute EMBED representations with `sentence-transformers/gtr-t5-base` and compute the cosine similarity between the train and query representations:
 ```bash
 ds="bbh"  # options: bbh, codex, gsm8k, tydiqa, mmlu_pro
 SAVE_DIR="files/index/embed_gtr-t5-base"
@@ -90,7 +85,7 @@ python3 -m representation.embed.compute_sentence_embeds \
 
 ### LESS
 
-Below we describe three steps to compute LESS representations: (i) train a model on the warmup dataset, (ii) compute the train and dev gradients, and (iii) compute the similarity matrix.
+Below, we describe three steps for computing LESS representations: (i) training a model on the warmup dataset, (ii) computing the training and development gradients, and (iii) computing the similarity matrix.
 
 **1.** Run the following command to train a model on the warmup dataset with `meta-llama/Llama-2-7b-hf`:
 ```bash
@@ -141,7 +136,7 @@ for ckpt in ${ckpts[@]}; do
 done
 ```
 
-**2.2** Run the following command to compute the gradients for the query set with `meta-llama/Llama-2-7b-hf`:
+**2.2** Run the following command to compute the query gradients for the query set with `meta-llama/Llama-2-7b-hf`:
 ```bash
 ckpts=(79 158 237 316)
 ds="bbh"  # options: bbh, codex, gsm8k, tydiqa, mmlu_pro
@@ -169,7 +164,7 @@ python3 -m embed.less.compute_less_similarity \
 ```
 
 ## Quantile Experiment
-In this section, we describe how to run the quantile experiment for the distance-based selection method. We create 10 distance quantiles based on the similarity matrix computed using different representations (RDS+, EMBED, LESS).
+In this section, we describe how to run the quantile experiment for the distance-based selection method. We compute 10 distance quantiles based on the similarity matrix generated from different representations (RDS+, EMBED, and LESS).
 
 
 We provide several pre-computed subsets on Hugging Face to make it easy to reproduce the distance quantile experiments:
@@ -218,7 +213,7 @@ do
         --report_to "wandb"
 done
 ```
-This command trains 10 models on the distance quantiles created using different representations with a fixed selection method (round robin in this case).
+This command trains 10 models on distance quantiles generated using different representations, with a fixed selection method (round-robin in this case).
 
 Options:
 - `--train_dataset_name`: The name of the training dataset. For the quantile experiment, this should be the name of the quantile dataset in Huggingface (e.g., `Harvard-DCML/tis-quantile-datasets-Llama-2-7b-hf`). If you are using embed, the dataset name should be `Harvard-DCML/tis-quantile-datasets-gtr-t5-base`.
@@ -282,13 +277,13 @@ python3 -m selection.sim_subset \
     --dev_dataset_name "${ds}"
 ```
 Options:
-- `--selection_method`: The selection method to use. For this command, this should be `round_robin`. You can change this to `doubly_greedy` and  `uot`.
+- `--selection_method`: The selection method to use. Here, we use `round_robin`. You can change this to `doubly_greedy` or  `uot`.
 - `--subset_dataset_dir`: The directory to save the created subsets. For this command, this should be `files/datasets/rds_rr_llama-2-7b-hf`.
 - `--similarity_matrix_path`: The path to the similarity matrix computed using the corresponding representation. For this command, this should be `files/index/rds_llama-2-7b-hf/${ds}_cossim.npy`. You need to change this path depending on the representation you are using (e.g., `files/index/embed_gtr-t5-base/${ds}_cossim.npy` for EMBED and `files/index/less_llama-2-7b-hf/${ds}_cossim.npy` for LESS).
 
 ### LESS with Doubly Greedy, UOT, KNN-Unif., KNN-KDE
 
-Run the following command to create the subsets with doubly greedy and UOT methods with :
+Run the following command to create the subsets with the doubly greedy and UOT:
 ```bash
 ds="bbh"  # options: bbh, codex, gsm8k, tydiqa, mmlu_pro
 selection=("doubly_greedy" "uot")
@@ -302,7 +297,7 @@ for method in ${selection[@]}; do
 done
 ```
 
-Run the following command to create the subsets with KNN-Uniform and KNN-KDE methods:
+Run the following command to create the subsets with KNN-Uniform and KNN-KDE:
 ```bash
 ds="bbh"  # options: bbh, codex, gsm8k, tydiqa, mmlu_pro
 ckpts=(79 158 237 316)
@@ -317,7 +312,7 @@ python3 -m selection.tsds_subset \
   --selection_method "${tsds_method}"
 ```
 
-Note this command requires the LESS representations and the model checkpoints trained on the warmup dataset. You can change the `--embed_dir` and `--ckpt_dir` arguments depending on where you have saved the LESS representations and the model checkpoints.
+Note that this command requires the LESS representations and the model checkpoints trained on the warmup dataset. You can change the `--embed_dir` and `--ckpt_dir` arguments depending on where you have saved the LESS representations and the model checkpoints.
 
 ### Training
 
