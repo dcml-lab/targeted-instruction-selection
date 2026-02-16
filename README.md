@@ -78,7 +78,7 @@ Run the following command to compute EMBED representations with `sentence-transf
 ```bash
 ds="bbh"  # options: bbh, codex, gsm8k, tydiqa, mmlu_pro
 SAVE_DIR="files/index/embed_gtr-t5-base"
-python3 -m representation.embed.compute_sentence_embeds.py \
+python3 -m representation.embed.compute_sentence_embeds \
     --model_name "sentence-transformers/gtr-t5-base" \
     --train_dataset_name "Harvard-DCML/tulu-v2-197K-processed" \
     --train_index_path ${SAVE_DIR}/train_embeds.pt \
@@ -141,7 +141,7 @@ for ckpt in ${ckpts[@]}; do
 done
 ```
 
-**2.2** Run the following command to compute the dev gradients for the dev set with `meta-llama/Llama-2-7b-hf`:
+**2.2** Run the following command to compute the gradients for the query set with `meta-llama/Llama-2-7b-hf`:
 ```bash
 ckpts=(79 158 237 316)
 ds="bbh"  # options: bbh, codex, gsm8k, tydiqa, mmlu_pro
@@ -236,8 +236,7 @@ do
     python3 -m evaluation.run_eval \
         --model_name_or_path "files/models/less_llama-2-7b-hf_${ds}_dist_quantile_${distance_quantile}" \
         --eval_dataset ${ds} \
-        --save_dir "files/results/distance_quantiles/llama-2-7b-hf/true_metric/less_${ds}_dist_quantile_${distance_quantile}" \
-        --apply_chat_template
+        --save_dir "files/results/distance_quantiles/llama-2-7b-hf/true_metric/less_${ds}_dist_quantile_${distance_quantile}"
 done
 ```
 Options:
@@ -254,7 +253,7 @@ do
     python3 -m evaluation.ce_loss \
         --model_name_or_path "files/models/less_llama-2-7b-hf_${ds}_dist_quantile_${distance_quantile}" \
         --eval_dataset ${ds} \
-        --save_dir "files/results/llama-2-7b-hf/ce_loss/less_${ds}_dist_quantile_${distance_quantile}" \
+        --output_path "files/results/distance_quantiles/llama-2-7b-hf/ce_loss/less_${ds}_dist_quantile_${distance_quantile}.json" \
 done
 ```
 
@@ -325,7 +324,7 @@ Note this command requires the LESS representations and the model checkpoints tr
 To train the models on the created subsets, run the following command:
 ```bash
 ds="bbh"  # options: bbh, codex, gsm8k, tydiqa, mmlu_pro
-for num_samples in {500 1000 2500 5000 10000};
+for num_samples in 500 1000 2500 5000 10000;
 do
     python3 -m training.train_sft \
         --model_name "meta-llama/Llama-2-7b-hf" \
@@ -342,7 +341,7 @@ do
         --logging_steps 1 \
         --train_dataset_name "Harvard-DCML/tis-subset-datasets-Llama-2-7b-hf" \
         --train_dataset_config_name "less_rr_${ds}_10000" \
-        --num_samples ${NUM_SAMPLES} \
+        --num_samples ${num_samples} \
         --run_name "less_rr_llama-2-7b-hf_${ds}_num_samples_${num_samples}_seed_0" \
         --report_to "wandb"
 done
@@ -361,13 +360,12 @@ Options:
 To evaluate the models trained on the subsets created with different data representations and selection algorithms on the test set, run the following command:
 ```bash
 export ds="bbh"
-for num_samples in {500 1000 2500 5000 10000};
+for num_samples in 500 1000 2500 5000 10000;
 do
     python3 -m evaluation.run_eval \
         --model_name_or_path "files/models/less_rr_llama-2-7b-hf_${ds}_num_samples_${num_samples}_seed_0" \
         --eval_dataset ${ds} \
-        --save_dir "files/results/distance_quantiles/llama-2-7b-hf/true_metric/less_rr_${ds}_num_samples_${num_samples}_seed_0" \
-        --apply_chat_template
+        --save_dir "files/results/subset_experiment/llama-2-7b-hf/true_metric/less_rr_${ds}_num_samples_${num_samples}_seed_0"
 done
 ```
 Make sure to pass the appropriate `--model_name_or_path`, `--eval_dataset`, and `--save_dir` arguments depending on the data representation, selection method, and budget you are evaluating.
@@ -375,12 +373,12 @@ Make sure to pass the appropriate `--model_name_or_path`, `--eval_dataset`, and 
 This command evaluates models trained on the subsets and reports the loss on the query set:
 ```bash
 ds="bbh"  # options: bbh, codex, gsm8k, tydiqa, mmlu_pro
-for num_samples in {500 1000 2500 5000 10000};
+for num_samples in 500 1000 2500 5000 10000;
 do
     python3 -m evaluation.ce_loss \
-        --model_name_or_path "files/models/less_llama-2-7b-hf_${ds}_num_samples_${num_samples}_seed_0" \
+        --model_name_or_path "files/models/less_rr_llama-2-7b-hf_${ds}_num_samples_${num_samples}_seed_0" \
         --eval_dataset ${ds} \
-        --save_dir "files/results/llama-2-7b-hf/ce_loss/less_${ds}_num_samples_${num_samples}_seed_0" \
+        --output_path "files/results/subset_experiment/llama-2-7b-hf/ce_loss/less_rr_${ds}_num_samples_${num_samples}_seed_0.json" \
 done
 ```
 
@@ -393,6 +391,8 @@ To create random subsets, run the following command:
 python3 -m selection.random --subset_dataset_dir "files/data/random_unbalanced" --seed 0
 ```
 
+If you prefer to use the pre-computed random subsets, you can find them on Hugging Face under [Harvard-DCML/tis-random-unbalanced](https://huggingface.co/datasets/Harvard-DCML/tis-random-unbalanced).
+
 ### Zero-Shot Evaluation
 
 To evaluate base models in a zero-shot setting, run the following command:
@@ -401,6 +401,7 @@ python3 -m evaluation.run_eval \
     --model_name_or_path "meta-llama/Llama-2-7b-hf" \
     --eval_dataset ${EVAL_DATASET}
     --save_dir "files/results/zero_shot/llama-2-7b-hf/true_metric/"
+    --zero_shot
 ```
 
 ## Plotting

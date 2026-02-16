@@ -113,13 +113,6 @@ def train():
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
     model.resize_token_embeddings(len(tokenizer))
 
-    # PEFT setup: prompt tuning or LoRA
-    if train_cfg.use_prompt_tuning and train_cfg.use_lora:
-        logger.warning(
-            "Both use_lora and use_prompt_tuning are True; "
-            "using prompt tuning and ignoring LoRA."
-        )
-
     if train_cfg.use_lora:
         if "llama" in train_cfg.model_name.lower():
             target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]
