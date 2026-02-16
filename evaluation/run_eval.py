@@ -90,7 +90,6 @@ def main() -> None:
             "8",
             *chat_args,
             *vllm_args,
-            *unknown,
         ]
         run(cmd)
 
@@ -115,7 +114,6 @@ def main() -> None:
             "20",
             *chat_args,
             *vllm_args,
-            *unknown,
         ]
         run(cmd)
 
@@ -134,7 +132,6 @@ def main() -> None:
             args.model_name_or_path,
             *chat_args,
             *vllm_args,
-            *unknown,
         ]
         run(cmd)
 
@@ -161,7 +158,6 @@ def main() -> None:
             "--model_name_or_path",
             args.model_name_or_path,
             *vllm_args,
-            *unknown,
         ]
         run(cmd)
 
@@ -180,7 +176,6 @@ def main() -> None:
             str(out_dir),
             "--dataset_name",
             "mmlu_pro",
-            *unknown,
         ]
         if not args.zero_shot:
             cmd.append("--apply_chat_template")
