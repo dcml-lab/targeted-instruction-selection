@@ -2,7 +2,7 @@
 
 Code for *A Critical Look at Targeted Instruction Selection: Disentangling What Matters (and What Doesn’t)*.
 
-Paper: **TODO**
+Paper: [https://arxiv.org/abs/2602.14696](https://arxiv.org/abs/2602.14696)
 
 Datasets: [https://huggingface.co/collections/Harvard-DCML/targeted-instruction-selection](https://huggingface.co/collections/Harvard-DCML/targeted-instruction-selection)
 
