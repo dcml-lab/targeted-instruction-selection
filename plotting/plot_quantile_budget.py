@@ -916,7 +916,9 @@ def main(args):
     base_prefix = "budget"
 
     def chart_path(prefix: str, *parts: str) -> Path:
-        filename = "_".join([prefix, *parts]).replace(" ", "_") + ".pdf"
+        # Choose extension based on flag
+        ext = "jpg" if args.save_jpg else "pdf"
+        filename = "_".join([prefix, *parts]).replace(" ", "_") + f".{ext}"
         return plot_dir / filename
 
     def csv_path(prefix: str, *parts: str) -> Path:
@@ -1032,6 +1034,11 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--focus_bin0", action="store_true", help="Whether to focus on bin 0 only"
+    )
+    parser.add_argument(
+        "--save_jpg",
+        action="store_true",
+        help="Save plots as .jpg (JPEG) instead of .pdf",
     )
     args = parser.parse_args()
     main(args)
