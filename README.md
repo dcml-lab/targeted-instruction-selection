@@ -404,9 +404,14 @@ If you want to reproduce the plots for the quantile and budget experiments in th
 ```bash
 python3 plotting/plot_quantile_budget.py --model_name meta-llama/Llama-2-7b-hf
 ```
-This code reads the `.csv` files in `assets/plot_data` to produce the plots.
+To generate the Dolci Instruct plots, use the pre-computed `.csv` files in `assets/dolci_plot_data`:
+```bash
+python3 plotting/plot_quantile_budget.py --model_name meta-llama/Llama-2-7b-hf --dolci_instruct
+```
+This code reads the `.csv` files in `assets/plot_data` to produce the paper plots, or `assets/dolci_plot_data` when `--dolci_instruct` is used. Dolci Instruct plots are saved under `files/paper/plots/dolci_quantile_budget/<model>/`.
 - `--model_name`: We include plotting data for five models (`meta-llama/Llama-2-7b-hf`, `meta-llama/Llama-3.2-3B`, `HuggingFaceTB/SmolLM3-3B-Base`, `Qwen/Qwen3-4B-Base`, `allenai/Olmo-3-1025-7B`). You can specify which model to plot by providing the corresponding `model_name` (e.g., `meta-llama/Llama-2-7b-hf` for Llama 2 7B).
 - `--focus_bin0`: Whether to focus on the first distance quantile (only available for Llama 2 7B).
+- `--dolci_instruct`: Whether to generate plots from `assets/dolci_plot_data` with Dolci Instruct in the plot titles.
 
 ## Credits
 
@@ -423,4 +428,3 @@ If you find this work useful, please consider citing our paper:
   year={2026}
 }
 ```
-
