@@ -417,10 +417,10 @@ If you find this work useful, please consider citing our paper:
 
 ```
 @article{nayak2026critical,
-  title={A Critical Look at Targeted Instruction Selection: Disentangling What Matters (and What Doesn’t)},
-  author={Nayak, Nihal V. and Rodriguez-Diaz, Paula and Hulkund, Neha and Beery, Sara and Alvarez-Melis, David},
-  journal={arXiv},
-  year={2026},
+  title={A Critical Look at Targeted Instruction Selection: Disentangling What Matters (and What Doesn't)},
+  author={Nayak, Nihal V and Rodriguez-Diaz, Paula and Hulkund, Neha and Beery, Sara and Alvarez-Melis, David},
+  journal={arXiv preprint arXiv:2602.14696},
+  year={2026}
 }
 ```
 
