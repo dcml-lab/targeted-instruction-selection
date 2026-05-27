@@ -121,7 +121,13 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--train_dataset_name", type=str, default="Harvard-DCML/tulu-v2-197K-processed"
+        "--train_dataset_name",
+        type=str,
+        default="Harvard-DCML/tulu-v2-197K-processed",
+        help=(
+            "Hugging Face train dataset name. Use "
+            "Harvard-DCML/dolci-instruct-sft-200K-processed for Dolci."
+        ),
     )
     parser.add_argument("--dev_dataset_name", type=str, required=True)
     parser.add_argument("--output_dir", type=str, required=True)

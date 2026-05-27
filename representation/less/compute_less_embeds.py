@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import os
 from hashlib import md5
 from typing import Any, Iterable, List, Optional
@@ -17,9 +18,12 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from common.data import construct_test_sample, encode_with_messages_format
 
+logger = logging.getLogger(__name__)
+
 
 def load_train_dataset(
     train_dataset_path: str,
+    train_dataset_name: str,
     tokenizer: AutoTokenizer,
     start_index: int = 0,
     end_index: int = None,
@@ -29,9 +33,7 @@ def load_train_dataset(
         # assuming it is json
         train_dataset = load_dataset("json", data_files=[train_dataset_path])["train"]
     else:
-        train_dataset = load_dataset(
-            "Harvard-DCML/tulu-v2-197K-processed", split="train"
-        )
+        train_dataset = load_dataset(train_dataset_name, split="train")
 
     if end_index is not None:
         end_index = min(end_index, len(train_dataset))
@@ -41,9 +43,22 @@ def load_train_dataset(
     if debug:
         train_dataset = train_dataset.select(range(100))
 
+    max_token_length = 2048
+    if "dolci" in train_dataset_name.lower():
+        max_token_length = 4096
+        logger.warning(
+            "Detected 'dolci' in train_dataset_name (%s); setting max_token_length "
+            "to %d.",
+            train_dataset_name,
+            max_token_length,
+        )
+
     train_dataset = train_dataset.map(
         lambda x: encode_with_messages_format(
-            example=x, tokenizer=tokenizer, max_seq_length=2048, include_response=True
+            example=x,
+            tokenizer=tokenizer,
+            max_seq_length=max_token_length,
+            include_response=True,
         ),
         num_proc=16,
     )
@@ -297,6 +312,11 @@ def get_base_model_name(model_name_or_path: str) -> str:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    )
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--save_dir",
@@ -306,6 +326,15 @@ if __name__ == "__main__":
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--train_dataset_path", type=str, default=None)
+    parser.add_argument(
+        "--train_dataset_name",
+        type=str,
+        default="Harvard-DCML/tulu-v2-197K-processed",
+        help=(
+            "Hugging Face train dataset name. Use "
+            "Harvard-DCML/dolci-instruct-sft-200K-processed for Dolci."
+        ),
+    )
     parser.add_argument("--train_index_path", type=str, default=None)
 
     parser.add_argument("--dev_dataset_name", type=str, default=None)
@@ -349,6 +378,7 @@ if __name__ == "__main__":
     if args.compute_train_grads:
         train_dataset, start_index, end_index = load_train_dataset(
             args.train_dataset_path,
+            train_dataset_name=args.train_dataset_name,
             tokenizer=tokenizer,
             start_index=args.start_index,
             end_index=args.end_index,

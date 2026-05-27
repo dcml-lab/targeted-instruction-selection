@@ -23,6 +23,10 @@ def main():
         "--train_dataset_name",
         type=str,
         default="Harvard-DCML/tulu-v2-197K-processed",
+        choices=[
+            "Harvard-DCML/tulu-v2-197K-processed",
+            "Harvard-DCML/dolci-instruct-sft-200K-processed",
+        ],
     )
     parser.add_argument("--dev_dataset_name", type=str, required=True)
     parser.add_argument("--selection_method", type=str, default="doubly_greedy")
