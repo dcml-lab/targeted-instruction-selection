@@ -28,6 +28,9 @@ from transformers import set_seed
 
 from common.data import encode_with_messages_format
 
+DEFAULT_MAX_TOKEN_LENGTH = 2048
+DOLCI_MAX_TOKEN_LENGTH = 4096
+
 
 @dataclass
 class TrainingConfig:
@@ -74,6 +77,15 @@ class TrainingConfig:
     )
     use_flash_attention_2: Optional[bool] = field(
         default=False, metadata={"help": "Whether to use Flash Attention 2."}
+    )
+    disable_dolci_max_token_length_override: Optional[bool] = field(
+        default=False,
+        metadata={
+            "help": (
+                "Disable automatically setting max token length to 4096 when "
+                "train_dataset_name contains 'dolci'."
+            )
+        },
     )
 
 
@@ -150,9 +162,24 @@ def train():
             [i for i in list(range(train_cfg.num_samples))]
         )
 
+    max_token_length = DEFAULT_MAX_TOKEN_LENGTH
+    if (
+        train_cfg.train_dataset_name is not None
+        and "dolci" in train_cfg.train_dataset_name.lower()
+        and not train_cfg.disable_dolci_max_token_length_override
+    ):
+        max_token_length = DOLCI_MAX_TOKEN_LENGTH
+        logger.warning(
+            "Detected 'dolci' in train_dataset_name (%s); setting max_token_length "
+            "to %d. Pass --disable_dolci_max_token_length_override True to suppress "
+            "this behavior.",
+            train_cfg.train_dataset_name,
+            max_token_length,
+        )
+
     train_dataset = train_dataset.map(
         lambda x: encode_with_messages_format(
-            x, tokenizer, 2048, only_first_two=False, add_bos_token=False
+            x, tokenizer, max_token_length, only_first_two=False, add_bos_token=False
         )
     )
     train_dataset.set_format(
@@ -160,7 +187,7 @@ def train():
     )
 
     # this filters out any samples where labels are all -100;
-    # this happens because the examples are longer than the max length of 2048
+    # this happens because the examples are longer than the max token length
     train_dataset = train_dataset.filter(lambda x: (x["labels"] != -100).any())
     collator = DataCollatorForSeq2Seq(
         tokenizer=tokenizer,
