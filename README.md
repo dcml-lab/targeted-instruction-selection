@@ -58,7 +58,7 @@ To create random subsets, run the following command:
 python3 -m selection.random --subset_dataset_dir "files/data/random_unbalanced" --seed 0
 ```
 
-If you prefer to use the pre-computed random subsets, you can find them on Hugging Face under [Harvard-DCML/tis-random-unbalanced](https://huggingface.co/datasets/Harvard-DCML/tis-random-unbalanced).
+If you prefer to use the pre-computed random subsets, you can find them on Hugging Face under [Harvard-DCML/tis-random-unbalanced](https://huggingface.co/datasets/Harvard-DCML/tis-random-unbalanced). For Dolci Instruct, the equivalent pre-computed random subsets are released under [Harvard-DCML/tis-dolci-random-unbalanced](https://huggingface.co/datasets/Harvard-DCML/tis-dolci-random-unbalanced).
 
 ### Zero-Shot Evaluation
 
