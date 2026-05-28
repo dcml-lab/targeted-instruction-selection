@@ -10,6 +10,10 @@ if __name__ == "__main__":
         "--train_dataset",
         type=str,
         default="Harvard-DCML/tulu-v2-197K-processed",
+        choices=[
+            "Harvard-DCML/tulu-v2-197K-processed",
+            "Harvard-DCML/dolci-instruct-sft-200K-processed",
+        ],
     )
     parser.add_argument("--subset_dataset_dir", type=str, required=True)
     parser.add_argument(

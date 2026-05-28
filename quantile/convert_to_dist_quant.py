@@ -20,6 +20,11 @@ def main():
         "--train_dataset",
         type=str,
         default="Harvard-DCML/tulu-v2-197K-processed",
+        choices=[
+            "Harvard-DCML/tulu-v2-197K-processed",
+            "Harvard-DCML/dolci-instruct-sft-200K-processed",
+        ],
+        help="Training dataset to load from Hugging Face.",
     )
     parser.add_argument("--dev_dataset_name", type=str, required=True)
     parser.add_argument("--subset_dataset_dir", type=str, required=True)

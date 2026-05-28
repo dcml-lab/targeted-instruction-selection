@@ -907,16 +907,23 @@ def plot_true_metric_grid_and_spearman_heatmap_side_by_side(
 def main(args):
     simple_name = MODEL_NAME_TO_SIMPLE_NAME[args.model_name]
 
-    plot_dir = Path(f"files/paper/plots/quantile_budget/{simple_name}/")
+    plot_root = "dolci_quantile_budget" if args.dolci_instruct else "quantile_budget"
+    plot_dir = Path(f"files/paper/plots/{plot_root}/{simple_name}/")
     plot_dir.mkdir(parents=True, exist_ok=True)
 
-    csv_dir = Path(f"assets/plot_data/quantile_budget/{simple_name}/")
+    csv_root = "dolci_plot_data" if args.dolci_instruct else "plot_data"
+    csv_dir = Path(f"assets/{csv_root}/quantile_budget/{simple_name}/")
+    model_display_name = MODEL_NAME_TO_DISPLAY_NAME[args.model_name]
+    if args.dolci_instruct:
+        model_display_name = f"{model_display_name}, Dolci Instruct"
 
     quantile_prefix = "sub_bin0_focus" if args.focus_bin0 else "binning"
     base_prefix = "budget"
 
     def chart_path(prefix: str, *parts: str) -> Path:
-        filename = "_".join([prefix, *parts]).replace(" ", "_") + ".pdf"
+        # Choose extension based on flag
+        ext = "jpg" if args.save_jpg else "pdf"
+        filename = "_".join([prefix, *parts]).replace(" ", "_") + f".{ext}"
         return plot_dir / filename
 
     def csv_path(prefix: str, *parts: str) -> Path:
@@ -948,7 +955,7 @@ def main(args):
         out_true_data_representation,
         zero_shot_df,
         EMBED_METHODS,
-        model_name=MODEL_NAME_TO_DISPLAY_NAME[args.model_name],
+        model_name=model_display_name,
         title=title,
     )
     print(f"Saved figure to: {out_true_data_representation}")
@@ -963,7 +970,7 @@ def main(args):
         out_ce_data_representation,
         which="dev",
         methods_to_plot=EMBED_METHODS,
-        model_name=MODEL_NAME_TO_DISPLAY_NAME[args.model_name],
+        model_name=model_display_name,
         title=title,
     )
     print(f"Saved figure to: {out_ce_data_representation}")
@@ -975,7 +982,7 @@ def main(args):
         zero_shot_df=None,
         output_path=out_true_sel_alg,
         methods=LESS_METHODS,
-        model_name=MODEL_NAME_TO_DISPLAY_NAME[args.model_name],
+        model_name=model_display_name,
         title=title,
     )
     print(f"Saved figure to: {out_true_sel_alg}")
@@ -988,7 +995,7 @@ def main(args):
         output_path=out_ce_sel_alg,
         which="dev",
         methods_to_plot=LESS_METHODS,
-        model_name=MODEL_NAME_TO_DISPLAY_NAME[args.model_name],
+        model_name=model_display_name,
         title=title,
     )
     print(f"Saved figure to: {out_ce_sel_alg}")
@@ -1001,7 +1008,7 @@ def main(args):
         df_quantile_ce,
         zero_shot_ce_df,
         out_combined_ce,
-        MODEL_NAME_TO_DISPLAY_NAME[args.model_name],
+        model_display_name,
         title=title,
     )
     print(f"Saved combined figure to: {out_combined_ce}")
@@ -1016,7 +1023,7 @@ def main(args):
         df_quantile_true,
         zero_shot_df,
         out_combined_true,
-        MODEL_NAME_TO_DISPLAY_NAME[args.model_name],
+        model_display_name,
         title=title,
     )
     print(f"Saved combined figure to: {out_combined_true}")
@@ -1032,6 +1039,16 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--focus_bin0", action="store_true", help="Whether to focus on bin 0 only"
+    )
+    parser.add_argument(
+        "--save_jpg",
+        action="store_true",
+        help="Save plots as .jpg (JPEG) instead of .pdf",
+    )
+    parser.add_argument(
+        "--dolci_instruct",
+        action="store_true",
+        help="Use Dolci Instruct plot data and save plots separately",
     )
     args = parser.parse_args()
     main(args)

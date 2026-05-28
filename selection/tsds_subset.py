@@ -406,6 +406,15 @@ def get_train_grads(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--train_dataset_name",
+        type=str,
+        default="Harvard-DCML/tulu-v2-197K-processed",
+        choices=[
+            "Harvard-DCML/tulu-v2-197K-processed",
+            "Harvard-DCML/dolci-instruct-sft-200K-processed",
+        ],
+    )
     parser.add_argument("--dev_dataset_name", type=str, required=True)
     parser.add_argument("--embed_dir", type=str, required=True)
     parser.add_argument("--ckpt_dir", type=str, required=True)
@@ -449,7 +458,7 @@ if __name__ == "__main__":
     cossim_matrix = np.load(sim_matrix_path)
 
     # load the train dataset
-    train_dataset = load_dataset("Harvard-DCML/tulu-v2-197K-processed", split="train")
+    train_dataset = load_dataset(args.train_dataset_name, split="train")
 
     if args.selection_method == "knn_uniform_cos":
         logging.info("Running TSDS-KNN-Uniform subset selection...")

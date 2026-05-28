@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 def load_train_dataset(
     train_dataset_path: str,
+    train_dataset_name: str,
     tokenizer: AutoTokenizer,
     start_index: int = 0,
     end_index: int = None,
@@ -29,9 +30,7 @@ def load_train_dataset(
         # assuming it is json
         train_dataset = load_dataset("json", data_files=[train_dataset_path])["train"]
     else:
-        train_dataset = load_dataset(
-            "Harvard-DCML/tulu-v2-197K-processed", split="train"
-        )
+        train_dataset = load_dataset(train_dataset_name, split="train")
 
     if end_index is not None:
         train_dataset = train_dataset.select(range(start_index, end_index))
@@ -42,9 +41,22 @@ def load_train_dataset(
     if debug:
         train_dataset = train_dataset.select(range(100))
 
+    max_token_length = 2048
+    if "dolci" in train_dataset_name.lower():
+        max_token_length = 4096
+        logger.warning(
+            "Detected 'dolci' in train_dataset_name (%s); setting max_token_length "
+            "to %d.",
+            train_dataset_name,
+            max_token_length,
+        )
+
     train_dataset = train_dataset.map(
         lambda x: encode_with_messages_format(
-            example=x, tokenizer=tokenizer, max_seq_length=2048, include_response=True
+            example=x,
+            tokenizer=tokenizer,
+            max_seq_length=max_token_length,
+            include_response=True,
         ),
         num_proc=16,
     )
@@ -98,6 +110,7 @@ def compute_rds_embeddings(
 def compute_train_embeddings(
     model,
     tokenizer,
+    train_dataset_name,
     train_dataset_path=None,
     pooling="weighted_mean",
     batch_size=1,
@@ -107,6 +120,7 @@ def compute_train_embeddings(
 ) -> torch.Tensor:
     train_dataset = load_train_dataset(
         train_dataset_path,
+        train_dataset_name=train_dataset_name,
         tokenizer=tokenizer,
         start_index=start_index,
         end_index=end_index,
@@ -164,6 +178,10 @@ def main():
         "--train_dataset_name",
         type=str,
         default="Harvard-DCML/tulu-v2-197K-processed",
+        help=(
+            "Hugging Face train dataset name. Use "
+            "Harvard-DCML/dolci-instruct-sft-200K-processed for Dolci."
+        ),
     )
     parser.add_argument("--train_index_path", type=str, default=None)
 
@@ -241,6 +259,7 @@ def main():
         all_train_embeds = compute_train_embeddings(
             model=model,
             tokenizer=tokenizer,
+            train_dataset_name=args.train_dataset_name,
             train_dataset_path=args.train_dataset_path,
             pooling=args.pooling,
             batch_size=args.batch_size,
